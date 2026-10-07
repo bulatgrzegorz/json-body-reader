@@ -128,6 +128,57 @@ Compare equivalent work. Early extraction may finish before reading or validatin
 
 The controlled streams return bytes immediately. Request benchmarks include adapter setup and cleanup, while decoding and lookup benchmarks isolate ready data. These timings do not measure network latency, Kestrel throughput, or middleware buffering costs. Run the benchmarks on the deployment environment before drawing production conclusions.
 
+## Results
+
+These are **local .NET 10.0.3 measurements** on Apple M2 / macOS 26.5.2 with SDK 10.0.103 and BenchmarkDotNet 0.15.8. The current request comparison completed 60 cases using `InProcessEmitToolchain`, three warmup iterations, and three measured iterations. Error ranges are available in the [full request report](docs/benchmarks/request-benchmark.md) and [CSV](docs/benchmarks/request-benchmark.csv); some are broad.
+
+### Request timing
+
+Each row below has a **16 KiB padding string** and one small root target, or no target for Missing. Values are mean microseconds; lower is better. All methods in a row receive the same controlled stream.
+
+| Position / chunk bytes | Full body + deserialize | JsonElement async | DTO async | Incremental full validation | Incremental early |
+|---|---:|---:|---:|---:|---:|
+| First / 64 | 8.482 | 4.948 | 3.341 | 5.036 | 0.187 |
+| First / 4096 | 5.605 | 3.930 | 2.332 | 2.686 | 0.262 |
+| Last / 64 | 8.463 | 4.920 | 3.380 | 5.117 | 5.022 |
+| Last / 4096 | 6.676 | 4.723 | 2.849 | 3.078 | 2.983 |
+| Missing / 64 | 8.270 | 4.834 | 3.291 | 4.973 | 4.985 |
+| Missing / 4096 | 5.213 | 3.761 | 2.242 | 2.582 | 2.568 |
+
+### Request allocations
+
+The same fixtures allocate the following managed bytes per operation. These include stream adapter setup and cleanup; they exclude middleware buffering and real HTTP transport costs.
+
+| Position / chunk bytes | Full body + deserialize | JsonElement async | DTO async | Incremental full validation | Incremental early |
+|---|---:|---:|---:|---:|---:|
+| First / 64 | 98856 B | 16856 B | 176 B | 696 B | 408 B |
+| First / 4096 | 94920 B | 16856 B | 176 B | 600 B | 408 B |
+| Last / 64 | 98856 B | 16856 B | 176 B | 696 B | 696 B |
+| Last / 4096 | 94920 B | 16856 B | 176 B | 600 B | 600 B |
+| Missing / 64 | 98568 B | 16608 B | 64 B | 656 B | 656 B |
+| Missing / 4096 | 94632 B | 16608 B | 64 B | 560 B | 560 B |
+
+### How to read these results
+
+- **Early extraction helps most when the property comes first.** It can return before scanning the large suffix, so its time measures obtaining the value rather than validating the whole document.
+- **Last and Missing require most or all of the body.** With 64-byte chunks, full incremental validation is close to, or somewhat slower than, the JsonElement serializer. With 4096-byte chunks, it is faster than that baseline in these large-padding fixtures.
+- **A known-schema DTO is still a strong default.** In the large-padding rows it finishes sooner than full incremental validation and allocates much less. Its search contract differs from the general any-depth parser on nested or duplicate names.
+- **Incremental inspection greatly reduces allocation compared with building a JsonElement document or copying the full body.** The remaining per-operation bytes largely come from the private stream reader. A borrowed request reader has a different setup cost and needs its own HTTP measurements.
+- **These are warmed allocation totals, not peak or retained memory.** Pooled byte buffers still occupy memory. Controlled synchronous streams and short in-process jobs do not establish production HTTP throughput.
+
+For small payloads, setup costs matter more. For example, Last / 64-byte chunks / 16-character padding measured **0.236 µs and 176 B** for the DTO versus **0.320 µs and 408 B** for full incremental validation.
+
+### Large matching values
+
+Skipping padding and returning a large string are different workloads. In the [segmented-string probe](docs/benchmarks/string-decoding-probe.txt), decoding a 16384-character matching value after warmup changed:
+
+| Segmented value | GetString allocation | Current parser allocation | Reduction |
+|---|---:|---:|---:|
+| Plain text | 49200 B | 32792 B | 33.3% |
+| Every character escaped as `\u0078` | 131120 B | 32792 B | 75.0% |
+
+The returned string accounts for the remaining bytes. The [decoding benchmark](docs/benchmarks/string-decoding-benchmark.md) measured comparable or lower time for large split values, while tiny split values cost about 6–8 ns more. Contiguous values keep `GetString`, since they already allocate only the result string. The escaped fixture deliberately stresses decoding; it does not represent a typical request distribution.
+
 ## Repository layout
 
 - `src/BodyReaderJson`: parser, buffered inspection helper, serializer baselines, and controlled chunked stream.

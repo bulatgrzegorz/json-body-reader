@@ -1,6 +1,12 @@
 # Recorded measurements
 
-These reports were recorded before extraction into this standalone repository, using the same parser and benchmark source. They are local diagnostics from Apple M2 / macOS 26.5.2, .NET SDK 10.0.103, .NET 10.0.3, and BenchmarkDotNet 0.15.8.
+The string and lookup reports were recorded before extraction, using the same parser and benchmark source. The request report was recorded directly from this standalone repository. They are local diagnostics from Apple M2 / macOS 26.5.2, .NET SDK 10.0.103, .NET 10.0.3, and BenchmarkDotNet 0.15.8.
+
+## Current request comparison
+
+The [60-case request report](request-benchmark.md) and [CSV](request-benchmark.csv) use the latest parser and the allocation-free property-name comparisons in the JsonElement baseline. The main README summarizes both timing and allocations for First, Last, and Missing with 16 KiB padding and 64- or 4096-byte chunks. The full report also includes small payloads.
+
+Early extraction and whole-document validation perform different work when the value comes first. A DTO uses a different general search contract. Adapter setup and cleanup are included; real HTTP and middleware replay costs are excluded.
 
 ## Matched-string decoding
 
@@ -41,6 +47,6 @@ dotnet run --project benchmarks/BodyReaderJson.Benchmarks -c Release -f net10.0 
 dotnet run --project benchmarks/BodyReaderJson.Benchmarks -c Release -f net10.0 -- --filter '*StringDecodingBenchmarks*' '*LookupBenchmarks*' --job Short
 ```
 
-All 40 checked-in benchmark cases completed with `InProcessEmitToolchain`, one launch, three warmup iterations, and three measured iterations. Some error ranges are wide. The reports are summaries, rather than raw iteration samples. Use an isolated run on the deployment environment for publication measurements.
+All 100 checked-in benchmark cases completed with `InProcessEmitToolchain`, one launch, three warmup iterations, and three measured iterations. Some error ranges are wide. The reports are summaries, rather than raw iteration samples. Use an isolated run on the deployment environment for publication measurements.
 
 The recorded local commands used `-p:UseAppHost=false -p:NuGetAudit=false` before `--`, and `--inProcess` for benchmarks. These worked around an app-host signing error and an unavailable NuGet audit endpoint with already-cached dependencies. They are command-line workarounds, not project settings.
