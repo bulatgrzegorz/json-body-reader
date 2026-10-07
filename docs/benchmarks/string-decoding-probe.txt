@@ -1,0 +1,19 @@
+Length Segmented Escaped GetString Parser ResultOnly (allocated bytes)
+    16     False   False        56     56         56
+  GetString 0.126 us; CopyChars 56 B / 0.139 us; CopyBytes 56 B / 0.126 us
+    16     False    True        56     56         56
+  GetString 0.494 us; CopyChars 56 B / 0.515 us; CopyBytes 56 B / 0.503 us
+    16      True   False        96     56         56
+  GetString 0.354 us; CopyChars 56 B / 0.372 us; CopyBytes 56 B / 0.364 us
+    16      True    True       176     56         56
+  GetString 0.694 us; CopyChars 56 B / 0.698 us; CopyBytes 56 B / 0.682 us
+ 16384     False   False     32792  32792      32792
+  GetString 4.185 us; CopyChars 32792 B / 4.191 us; CopyBytes 32792 B / 4.912 us
+ 16384     False    True     32792  32792      32792
+  GetString 145.679 us; CopyChars 32792 B / 141.457 us; CopyBytes 32792 B / 140.775 us
+ 16384      True   False     49200  32792      32792
+  GetString 3.477 us; CopyChars 32792 B / 3.080 us; CopyBytes 32792 B / 3.412 us
+ 16384      True    True    131120  32792      32792
+  GetString 152.933 us; CopyChars 32792 B / 152.109 us; CopyBytes 32792 B / 148.785 us
+  ParseValueDocument: 32864 B / 231.477 us
+PASS: parser allocates only its result string.

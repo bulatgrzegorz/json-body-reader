@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/TestResults/
+**/BenchmarkDotNet.Artifacts/
+.idea/
+.vs/
+*.user
+*.DotSettings.user
+.DS_Store

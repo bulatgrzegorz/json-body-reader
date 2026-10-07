@@ -1,0 +1,26 @@
+Position Chunk Padding Before After Saved (bytes per operation)
+First      64      16    592   408   184
+First      64   16384    592   408   184
+First    4096      16    592   408   184
+First    4096   16384    592   408   184
+Last       64      16    592   408   184
+Last       64   16384    880   696   184
+Last     4096      16    592   408   184
+Last     4096   16384    784   600   184
+Missing    64      16    408   368    40
+Missing    64   16384    696   656    40
+Missing  4096      16    408   368    40
+Missing  4096   16384    600   560    40
+Parser only, match: 40 B
+Parser only, missing: 0 B
+Stream only: 40 B
+Reader options only: 40 B
+Reader creation and completion (existing stream/options, no reads): 184 B
+Missing, 64-byte chunks, 16 KiB padding, buffer 4096, minimum read 1: 560 B, 5.17 us
+Missing, 64-byte chunks, 16 KiB padding, buffer 4096, minimum read 64: 560 B, 5.12 us
+Missing, 64-byte chunks, 16 KiB padding, buffer 4096, minimum read 512: 656 B, 4.77 us
+Missing, 64-byte chunks, 16 KiB padding, buffer 4096, minimum read 1024: 656 B, 4.53 us
+Missing, 64-byte chunks, 16 KiB padding, buffer 32768, minimum read 1024: 368 B, 4.25 us
+Borrowed reader, missing, one genuinely pending read (same-thread continuation): 232 B before, 0 B after
+Full validation, borrowed reader, first match plus 128 discarded 1 KiB matches: 265480 B before, 32 B after
+PASS: every fixture allocates less than the frozen baseline.

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/BodyReaderJson/BodyReaderJson.csproj" />
+  <Project Path="tests/BodyReaderJson.Tests/BodyReaderJson.Tests.csproj" />
+  <Project Path="benchmarks/BodyReaderJson.Benchmarks/BodyReaderJson.Benchmarks.csproj" />
+</Solution>

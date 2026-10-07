@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.66.27" />
+    <ProjectReference Include="../../src/BodyReaderJson/BodyReaderJson.csproj" />
+  </ItemGroup>
+</Project>
